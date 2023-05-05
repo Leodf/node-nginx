@@ -12,20 +12,37 @@ const config = {
 const mysql = require('mysql')
 const connection = mysql.createConnection(config)
 
+function createTable () {
+    connection.query(`SHOW TABLES LIKE 'people'`, function (err, rows) {
+        if (err) return console.error(err)
+        if(rows.length == 1){
+            return
+        } else {
+            const createTableQuery = `CREATE TABLE people (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                name VARCHAR(255) NOT NULL
+              )`
+              connection.query(createTableQuery, function(err, result) {
+                if (err) return console.error(err);
+                console.log(`A tabela people foi criada.`);
+              })
+        }
+    })
+}
+createTable()
+
 app.get('/',  async (req, res) => {
-    const users = await sqlQuery(connection)
-    function sqlQuery(conecction) {
+    function getUsers () {
         return new Promise((resolve, reject) => {
-            const sql = 'SELECT * FROM `people`'
-            conecction.query(sql, function (error, results) {
-                if(error) {
-                    console.error(error)
-                }
-                const users = JSON.parse(JSON.stringify(results))
-                resolve(users)
+            connection.query('SELECT * FROM `people`', function (err, rows) {
+                if (err) return console.error(err)
+                const usersData = JSON.parse(JSON.stringify(rows))
+                resolve(usersData)
             })
         })
+        
     }
+    const users = await getUsers()
     res.send(
         `
             <h1>Full cycle Rocks</h1>

@@ -22,10 +22,12 @@ services:
     tty: true
   
   app:
-    image: node:16
+    build:
+      context: node
     container_name: app-container
     working_dir: /usr/src/app
-    command: bash -c "npm install && node --watch index.js"
+    entrypoint: dockerize -wait tcp://mysql-db:3306 -timeout 20s docker-entrypoint.sh
+    command: bash -c "npm install && npm start"
     networks:
       - proxy
       - backend
